@@ -1,0 +1,56 @@
+{
+  "name": "library-management-system",
+  "version": "1.0.0",
+  "description": "Modern offline Library Management Software built with Electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "library",
+    "management",
+    "electron",
+    "sqlite",
+    "offline"
+  ],
+  "author": "Library Management Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1"
+  },
+  "build": {
+    "appId": "com.library.management",
+    "productName": "Library Management System",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/**/*",
+      "!dist/**/*",
+      "!build/**/*",
+      "!*.log",
+      "node_modules/chart.js/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/logo/lg_main.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true
+    }
+  }
+}

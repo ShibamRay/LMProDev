@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - Library Management System</title>
+    <link rel="icon" type="image/png" href="../assets/logo/lg_main.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50">
+        <div class="flex items-center justify-center h-16 bg-indigo-600">
+            <i class="fas fa-book text-white text-2xl mr-3"></i>
+            <span class="text-white text-xl font-bold">Library MS</span>
+        </div>
+        
+        <nav class="mt-8">
+            <a href="dashboard.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                Dashboard
+            </a>
+            <a href="books.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-book mr-3"></i>
+                Books
+            </a>
+            <a href="users.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-users mr-3"></i>
+                Users
+            </a>
+            <a href="borrow.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-exchange-alt mr-3"></i>
+                Borrow/Return
+            </a>
+            <a href="reports.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 bg-indigo-50 border-r-4 border-indigo-600">
+                <i class="fas fa-chart-bar mr-3"></i>
+                Reports
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 w-full p-6">
+            <button id="logoutBtn" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Reports & Analytics</h1>
+            <p class="text-gray-600">Analyze library usage patterns and generate reports</p>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="mb-8 flex flex-wrap gap-4">
+            <button id="exportBooksBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center">
+                <i class="fas fa-download mr-2"></i>
+                Export Books CSV
+            </button>
+            <button id="exportUsersBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200 flex items-center">
+                <i class="fas fa-download mr-2"></i>
+                Export Users CSV
+            </button>
+            <button id="exportBorrowingsBtn" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-200 flex items-center">
+                <i class="fas fa-download mr-2"></i>
+                Export Borrowings CSV
+            </button>
+            <button id="refreshDataBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition duration-200 flex items-center">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Refresh Data
+            </button>
+        </div>
+
+        <!-- Single User Report Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-800">Single User Report</h3>
+                <div class="flex items-center text-sm text-gray-500">
+                    <i class="fas fa-user-chart mr-2"></i>
+                    Individual Statistics
+                </div>
+            </div>
+            
+            <!-- Search Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label for="searchByName" class="block text-sm font-medium text-gray-700 mb-2">Search by Name</label>
+                    <input type="text" id="searchByName" placeholder="Enter user name..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="searchByGrade" class="block text-sm font-medium text-gray-700 mb-2">Search by Grade</label>
+                    <select id="searchByGrade" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Grades</option>
+                        <option value="1st">1st Grade</option>
+                        <option value="2nd">2nd Grade</option>
+                        <option value="3rd">3rd Grade</option>
+                        <option value="4th">4th Grade</option>
+                        <option value="5th">5th Grade</option>
+                        <option value="6th">6th Grade</option>
+                        <option value="7th">7th Grade</option>
+                        <option value="8th">8th Grade</option>
+                        <option value="9th">9th Grade</option>
+                        <option value="10th">10th Grade</option>
+                        <option value="11th">11th Grade</option>
+                        <option value="12th">12th Grade</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="searchByStudentId" class="block text-sm font-medium text-gray-700 mb-2">Search by Student ID</label>
+                    <input type="text" id="searchByStudentId" placeholder="Enter Student ID..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-4 mb-6">
+                <div class="flex-1 min-w-64">
+                    <label for="userSelect" class="block text-sm font-medium text-gray-700 mb-2">Select User</label>
+                    <select id="userSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Choose a user...</option>
+                    </select>
+                </div>
+                <button id="generateUserReportBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Generate Report
+                </button>
+                <button id="clearSearchBtn" class="bg-gray-500 text-white px-4 py-3 rounded-lg hover:bg-gray-600 transition duration-200 flex items-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Clear Search
+                </button>
+            </div>
+
+            <!-- User Report Results -->
+            <div id="userReportResults" class="hidden">
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                    <i class="fas fa-book text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total Books Borrowed</p>
+                                    <p id="userTotalBorrowed" class="text-xl font-bold text-blue-600">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 rounded-full p-2 mr-3">
+                                    <i class="fas fa-clock text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Borrowing Sessions</p>
+                                    <p id="userBorrowingSessions" class="text-xl font-bold text-green-600">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="bg-yellow-100 rounded-full p-2 mr-3">
+                                    <i class="fas fa-language text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Preferred Language</p>
+                                    <p id="userPreferredLanguage" class="text-xl font-bold text-yellow-600">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 rounded-full p-2 mr-3">
+                                    <i class="fas fa-tags text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Preferred Type</p>
+                                    <p id="userPreferredType" class="text-xl font-bold text-purple-600">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-md font-semibold text-gray-800 mb-4">Language Preferences</h4>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="userLanguageChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-md font-semibold text-gray-800 mb-4">Book Type Preferences</h4>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="userTypeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Borrowing History -->
+                    <div class="mt-6">
+                        <h4 class="text-md font-semibold text-gray-800 mb-4">Recent Borrowing History</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-gray-700">Book Title</th>
+                                        <th class="px-4 py-2 text-left text-gray-700">Author</th>
+                                        <th class="px-4 py-2 text-left text-gray-700">Type</th>
+                                        <th class="px-4 py-2 text-left text-gray-700">Language</th>
+                                        <th class="px-4 py-2 text-left text-gray-700">Borrow Date</th>
+                                        <th class="px-4 py-2 text-left text-gray-700">Return Date</th>
+                                        <th class="px-4 py-2 text-left text-gray-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userBorrowingHistory" class="bg-white divide-y divide-gray-200">
+                                    <!-- User borrowing history will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="noUserHistoryMessage" class="hidden p-4 text-center text-gray-500">
+                            <i class="fas fa-history text-2xl mb-2"></i>
+                            <p>No borrowing history available for this user</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Book Types Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Books by Type</h3>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-chart-pie mr-2"></i>
+                        Distribution
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="bookTypesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Language Distribution Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Books by Language</h3>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-chart-doughnut mr-2"></i>
+                        Distribution
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="languageChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Borrowing Trends Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Borrowing by Book Type</h3>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Usage Analytics
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="borrowingTrendsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Language Usage Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Borrowing by Language</h3>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Usage Analytics
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="languageUsageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-book text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Books</p>
+                        <p id="totalBooksCount" class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-green-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-users text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Users</p>
+                        <p id="totalUsersCount" class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-yellow-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-exchange-alt text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Borrowings</p>
+                        <p id="totalBorrowingsCount" class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-hand-holding text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Active Borrowings</p>
+                        <p id="activeBorrowingsCount" class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Users Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Top Active Users</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Borrowed</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currently Borrowed</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Most Read Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topUsersTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Top users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="noUsersMessage" class="hidden p-8 text-center text-gray-500">
+                <i class="fas fa-users text-4xl mb-4"></i>
+                <p class="text-lg">No user data available</p>
+                <p class="text-sm">User statistics will appear here once borrowing activity begins</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        let reportsData = null;
+        let charts = {};
+
+        // DOM elements
+        const logoutBtn = document.getElementById('logoutBtn');
+        const refreshDataBtn = document.getElementById('refreshDataBtn');
+        const exportBooksBtn = document.getElementById('exportBooksBtn');
+        const exportUsersBtn = document.getElementById('exportUsersBtn');
+        const exportBorrowingsBtn = document.getElementById('exportBorrowingsBtn');
+        const topUsersTableBody = document.getElementById('topUsersTableBody');
+        const noUsersMessage = document.getElementById('noUsersMessage');
+        
+        // Single user report elements
+        const userSelect = document.getElementById('userSelect');
+        const generateUserReportBtn = document.getElementById('generateUserReportBtn');
+        const userReportResults = document.getElementById('userReportResults');
+        const userTotalBorrowed = document.getElementById('userTotalBorrowed');
+        const userBorrowingSessions = document.getElementById('userBorrowingSessions');
+        const userPreferredLanguage = document.getElementById('userPreferredLanguage');
+        const userPreferredType = document.getElementById('userPreferredType');
+        const userBorrowingHistory = document.getElementById('userBorrowingHistory');
+        const noUserHistoryMessage = document.getElementById('noUserHistoryMessage');
+
+        // Search elements
+        const searchByNameInput = document.getElementById('searchByName');
+        const searchByGradeSelect = document.getElementById('searchByGrade');
+        const searchByStudentIdInput = document.getElementById('searchByStudentId');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+        // Load reports data
+        async function loadReportsData() {
+            try {
+                reportsData = await ipcRenderer.invoke('getReportsData');
+                
+                if (!reportsData) {
+                    console.error('No reports data received');
+                    showNotification('No reports data available', 'error');
+                    return;
+                }
+                
+                updateStatistics();
+                renderCharts();
+                renderTopUsers();
+                populateUserSelector();
+                showNotification('Reports data loaded successfully', 'success');
+            } catch (error) {
+                console.error('Error loading reports data:', error);
+                showNotification(`Error loading reports data: ${error.message}`, 'error');
+            }
+        }
+
+        // Populate user selector dropdown
+        function populateUserSelector() {
+            if (!reportsData || !reportsData.users) return;
+            
+            userSelect.innerHTML = '<option value="">Choose a user...</option>';
+            reportsData.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (${user.student_id || 'No ID'}) - ${user.email || 'No Email'}`;
+                userSelect.appendChild(option);
+            });
+        }
+
+        // Filter users based on search criteria
+        function filterUsers() {
+            const nameSearch = searchByNameInput.value.toLowerCase().trim();
+            const gradeSearch = searchByGradeSelect.value;
+            const studentIdSearch = searchByStudentIdInput.value.toLowerCase().trim();
+            
+            if (!reportsData || !reportsData.users) return;
+            
+            const filteredUsers = reportsData.users.filter(user => {
+                const nameMatch = !nameSearch || user.name.toLowerCase().includes(nameSearch);
+                const gradeMatch = !gradeSearch || user.grade === gradeSearch;
+                const studentIdMatch = !studentIdSearch || (user.student_id && user.student_id.toLowerCase().includes(studentIdSearch));
+                
+                return nameMatch && gradeMatch && studentIdMatch;
+            });
+            
+            // Update user selector with filtered results
+            userSelect.innerHTML = '<option value="">Choose a user...</option>';
+            filteredUsers.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (${user.student_id || 'No ID'}) - ${user.email || 'No Email'}`;
+                userSelect.appendChild(option);
+            });
+            
+            // Update generate button state
+            generateUserReportBtn.disabled = filteredUsers.length === 0;
+        }
+
+        // Clear search and reset user selector
+        function clearSearch() {
+            searchByNameInput.value = '';
+            searchByGradeSelect.value = '';
+            searchByStudentIdInput.value = '';
+            populateUserSelector();
+            generateUserReportBtn.disabled = true;
+            userReportResults.classList.add('hidden');
+        }
+
+        // Generate single user report
+        async function generateUserReport() {
+            const userId = userSelect.value;
+            
+            if (!userId) {
+                showNotification('Please select a user first', 'error');
+                return;
+            }
+
+            try {
+                const userReport = await ipcRenderer.invoke('getSingleUserReport', userId);
+                
+                if (userReport.success) {
+                    displayUserReport(userReport.data);
+                    userReportResults.classList.remove('hidden');
+                } else {
+                    showNotification(userReport.message || 'Error generating user report', 'error');
+                }
+            } catch (error) {
+                console.error('Error generating user report:', error);
+                showNotification(`Error generating user report: ${error.message}`, 'error');
+            }
+        }
+
+        // Display user report data
+        function displayUserReport(userData) {
+            // Update statistics cards
+            userTotalBorrowed.textContent = userData.totalBooksBorrowed || 0;
+            userBorrowingSessions.textContent = userData.borrowingSessions || 0;
+            userPreferredLanguage.textContent = userData.preferredLanguage || 'N/A';
+            userPreferredType.textContent = userData.preferredType || 'N/A';
+
+            // Render user charts
+            renderUserLanguageChart(userData.languageStats || []);
+            renderUserTypeChart(userData.typeStats || []);
+
+            // Render borrowing history
+            renderUserBorrowingHistory(userData.borrowingHistory || []);
+        }
+
+        // Render user language preferences chart
+        function renderUserLanguageChart(languageData) {
+            const ctx = document.getElementById('userLanguageChart').getContext('2d');
+            
+            if (charts.userLanguage) {
+                charts.userLanguage.destroy();
+            }
+            
+            if (languageData.length === 0) {
+                // Show "No data" message
+                const canvas = document.getElementById('userLanguageChart');
+                const ctx2d = canvas.getContext('2d');
+                ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+                ctx2d.font = '16px Arial';
+                ctx2d.fillStyle = '#9CA3AF';
+                ctx2d.textAlign = 'center';
+                ctx2d.fillText('No language data', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            charts.userLanguage = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: languageData.map(item => item.language),
+                    datasets: [{
+                        data: languageData.map(item => item.count),
+                        backgroundColor: [
+                            '#6366F1', '#EC4899', '#10B981', '#F59E0B',
+                            '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render user book type preferences chart
+        function renderUserTypeChart(typeData) {
+            const ctx = document.getElementById('userTypeChart').getContext('2d');
+            
+            if (charts.userType) {
+                charts.userType.destroy();
+            }
+            
+            if (typeData.length === 0) {
+                // Show "No data" message
+                const canvas = document.getElementById('userTypeChart');
+                const ctx2d = canvas.getContext('2d');
+                ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+                ctx2d.font = '16px Arial';
+                ctx2d.fillStyle = '#9CA3AF';
+                ctx2d.textAlign = 'center';
+                ctx2d.fillText('No type data', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            charts.userType = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: typeData.map(item => item.type),
+                    datasets: [{
+                        label: 'Books Borrowed',
+                        data: typeData.map(item => item.count),
+                        backgroundColor: '#8B5CF6',
+                        borderColor: '#7C3AED',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render user borrowing history table
+        function renderUserBorrowingHistory(historyData) {
+            if (!historyData || historyData.length === 0) {
+                userBorrowingHistory.innerHTML = '';
+                noUserHistoryMessage.classList.remove('hidden');
+                return;
+            }
+
+            noUserHistoryMessage.classList.add('hidden');
+            userBorrowingHistory.innerHTML = historyData.map(record => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-gray-900">${record.bookTitle || 'N/A'}</td>
+                    <td class="px-4 py-3 text-gray-700">${record.author || 'N/A'}</td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            record.type === 'study-book' ? 'bg-yellow-100 text-yellow-800' :
+                            record.type === 'fiction' ? 'bg-blue-100 text-blue-800' :
+                            record.type === 'non-fiction' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                        }">
+                            ${record.type || 'N/A'}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700">${record.language || 'N/A'}</td>
+                    <td class="px-4 py-3 text-gray-700">${record.borrowDate || 'N/A'}</td>
+                    <td class="px-4 py-3 text-gray-700">${record.returnDate || 'Not returned'}</td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            record.returnDate ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }">
+                            ${record.returnDate ? 'Returned' : 'Active'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update statistics cards
+        function updateStatistics() {
+            if (!reportsData) return;
+            
+            document.getElementById('totalBooksCount').textContent = reportsData.totalBooks || 0;
+            document.getElementById('totalUsersCount').textContent = reportsData.totalUsers || 0;
+            document.getElementById('totalBorrowingsCount').textContent = reportsData.totalBorrowings || 0;
+            document.getElementById('activeBorrowingsCount').textContent = reportsData.activeBorrowings || 0;
+        }
+
+        // Render all charts
+        function renderCharts() {
+            if (!reportsData) return;
+            
+            renderBookTypesChart();
+            renderLanguageChart();
+            renderBorrowingTrendsChart();
+            renderLanguageUsageChart();
+        }
+
+        // Render book types pie chart
+        function renderBookTypesChart() {
+            const ctx = document.getElementById('bookTypesChart').getContext('2d');
+            
+            if (charts.bookTypes) {
+                charts.bookTypes.destroy();
+            }
+            
+            const data = reportsData.booksByType || [];
+            
+            charts.bookTypes = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(item => item.type),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
+                            '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render language distribution chart
+        function renderLanguageChart() {
+            const ctx = document.getElementById('languageChart').getContext('2d');
+            
+            if (charts.language) {
+                charts.language.destroy();
+            }
+            
+            const data = reportsData.booksByLanguage || [];
+            
+            charts.language = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => item.language),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#6366F1', '#EC4899', '#10B981', '#F59E0B',
+                            '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render borrowing trends chart
+        function renderBorrowingTrendsChart() {
+            const ctx = document.getElementById('borrowingTrendsChart').getContext('2d');
+            
+            if (charts.borrowingTrends) {
+                charts.borrowingTrends.destroy();
+            }
+            
+            const data = reportsData.borrowingsByType || [];
+            
+            charts.borrowingTrends = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.type),
+                    datasets: [{
+                        label: 'Times Borrowed',
+                        data: data.map(item => item.count),
+                        backgroundColor: '#3B82F6',
+                        borderColor: '#1D4ED8',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render language usage chart
+        function renderLanguageUsageChart() {
+            const ctx = document.getElementById('languageUsageChart').getContext('2d');
+            
+            if (charts.languageUsage) {
+                charts.languageUsage.destroy();
+            }
+            
+            const data = reportsData.borrowingsByLanguage || [];
+            
+            charts.languageUsage = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.language),
+                    datasets: [{
+                        label: 'Times Borrowed',
+                        data: data.map(item => item.count),
+                        backgroundColor: '#10B981',
+                        borderColor: '#059669',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render top users table
+        function renderTopUsers() {
+            if (!reportsData || !reportsData.topUsers || reportsData.topUsers.length === 0) {
+                topUsersTableBody.innerHTML = '';
+                noUsersMessage.classList.remove('hidden');
+                return;
+            }
+
+            noUsersMessage.classList.add('hidden');
+            topUsersTableBody.innerHTML = reportsData.topUsers.map(user => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-8 w-8">
+                                <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                    <i class="fas fa-user text-indigo-600 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900">${user.name}</div>
+                                <div class="text-sm text-gray-500">${user.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${user.total_borrowed || 0}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${user.currently_borrowed || 0}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                            ${user.most_read_type || 'N/A'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Export CSV functions
+        async function exportCSV(type) {
+            try {
+                const result = await ipcRenderer.invoke('exportCSV', type);
+                if (result.success) {
+                    showNotification(`${type} data exported successfully to ${result.filename}`, 'success');
+                } else {
+                    showNotification(result.message || `Error exporting ${type} data`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error exporting ${type} data`, 'error');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Event listeners
+        refreshDataBtn.addEventListener('click', () => {
+            loadReportsData();
+            showNotification('Reports data refreshed', 'success');
+        });
+
+        exportBooksBtn.addEventListener('click', () => exportCSV('books'));
+        exportUsersBtn.addEventListener('click', () => exportCSV('users'));
+        exportBorrowingsBtn.addEventListener('click', () => exportCSV('borrowings'));
+
+        generateUserReportBtn.addEventListener('click', generateUserReport);
+        
+        // User selector change event
+        userSelect.addEventListener('change', () => {
+            const userId = userSelect.value;
+            generateUserReportBtn.disabled = !userId;
+            if (!userId) {
+                userReportResults.classList.add('hidden');
+            }
+        });
+        
+        // Search input events
+        searchByNameInput.addEventListener('input', filterUsers);
+        searchByGradeSelect.addEventListener('change', filterUsers);
+        searchByStudentIdInput.addEventListener('input', filterUsers);
+        clearSearchBtn.addEventListener('click', clearSearch);
+
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Load data when page loads
+        window.addEventListener('load', () => {
+            loadReportsData();
+        });
+
+        // Cleanup charts on page unload
+        window.addEventListener('beforeunload', () => {
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "book_id": 1,
+    "status": "returned",
+    "borrowed_date": "2025-08-24T17:52:26.537Z",
+    "return_date": "2025-08-24T17:52:35.064Z"
+  },
+  {
+    "id": 2,
+    "user_id": 3,
+    "book_id": 2,
+    "status": "returned",
+    "borrowed_date": "2025-08-26T03:37:42.977Z",
+    "return_date": "2025-08-26T04:07:12.198Z"
+  },
+  {
+    "id": 3,
+    "user_id": 1,
+    "book_id": 2,
+    "status": "returned",
+    "borrowed_date": "2025-08-26T04:04:33.691Z",
+    "return_date": "2025-08-26T04:34:41.099Z"
+  },
+  {
+    "id": 4,
+    "user_id": 2,
+    "book_id": 2,
+    "status": "returned",
+    "borrowed_date": "2025-08-26T04:07:04.560Z",
+    "return_date": "2025-08-26T04:34:43.526Z"
+  },
+  {
+    "id": 5,
+    "user_id": 3,
+    "book_id": 5,
+    "status": "returned",
+    "borrowed_date": "2025-08-26T04:34:20.594Z",
+    "return_date": "2025-08-28T10:02:23.502Z"
+  },
+  {
+    "id": 6,
+    "user_id": 1,
+    "book_id": 3,
+    "status": "returned",
+    "borrowed_date": "2025-08-26T04:34:33.212Z",
+    "return_date": "2025-08-28T10:02:22.142Z"
+  }
+]

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books Management - Library Management System</title>
+    <link rel="icon" type="image/png" href="../assets/logo/lg_main.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .modal {
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50">
+        <div class="flex items-center justify-center h-16 bg-indigo-600">
+            <i class="fas fa-book text-white text-2xl mr-3"></i>
+            <span class="text-white text-xl font-bold">Library MS</span>
+        </div>
+        
+        <nav class="mt-8">
+            <a href="dashboard.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                Dashboard
+            </a>
+            <a href="books.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 bg-indigo-50 border-r-4 border-indigo-600">
+                <i class="fas fa-book mr-3"></i>
+                Books
+            </a>
+            <a href="users.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-users mr-3"></i>
+                Users
+            </a>
+            <a href="borrow.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-exchange-alt mr-3"></i>
+                Borrow/Return
+            </a>
+            <a href="reports.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-chart-bar mr-3"></i>
+                Reports
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 w-full p-6">
+            <button id="logoutBtn" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Books Management</h1>
+                <p class="text-gray-600">Manage your library's book collection</p>
+            </div>
+            <button id="addBookBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition duration-200 flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Add New Book
+            </button>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search books by title, author, type, or language..."
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        >
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <button id="searchBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition duration-200">
+                    <i class="fas fa-search mr-2"></i>
+                    Search
+                </button>
+                <button id="clearBtn" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <!-- Books Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Books List</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Language</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Copies</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Books will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="noBooksMessage" class="hidden p-8 text-center text-gray-500">
+                <i class="fas fa-book text-4xl mb-4"></i>
+                <p class="text-lg">No books found</p>
+                <p class="text-sm">Add your first book to get started</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Book Modal -->
+    <div id="bookModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Add New Book</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition duration-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="bookForm" class="p-6">
+                <input type="hidden" id="bookId">
+                
+                <div class="mb-4">
+                    <label for="bookCode" class="block text-sm font-medium text-gray-700 mb-2">Book Code *</label>
+                    <div class="flex">
+                        <input 
+                            type="text" 
+                            id="bookCode" 
+                            name="bookCode" 
+                            required
+                            readonly
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                            placeholder="Auto-generated book code"
+                        >
+                        <button 
+                            type="button" 
+                            id="generateCodeBtn" 
+                            class="ml-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200"
+                        >
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Enter book title"
+                    >
+                </div>
+                
+                <div class="mb-4">
+                    <label for="author" class="block text-sm font-medium text-gray-700 mb-2">Author *</label>
+                    <input 
+                        type="text" 
+                        id="author" 
+                        name="author" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Enter author name"
+                    >
+                </div>
+                
+                <div class="mb-4">
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Type *</label>
+                    <select 
+                        id="type" 
+                        name="type" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                        <option value="">Select book type</option>
+                        <option value="comics">Comics</option>
+                        <option value="story">Story</option>
+                        <option value="novel">Novel</option>
+                        <option value="high-content">High-Content</option>
+                        <option value="study-book">Study Book</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="language" class="block text-sm font-medium text-gray-700 mb-2">Language *</label>
+                    <input 
+                        type="text" 
+                        id="language" 
+                        name="language" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="e.g., English, Hindi, Spanish"
+                    >
+                </div>
+                
+                <div class="mb-4">
+                    <label for="copies" class="block text-sm font-medium text-gray-700 mb-2">Number of Copies Available *</label>
+                    <input 
+                        type="number" 
+                        id="copies" 
+                        name="copies" 
+                        required
+                        min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Enter number of copies"
+                    >
+                </div>
+                
+                <div class="mb-6">
+                    <label for="availability" class="block text-sm font-medium text-gray-700 mb-2">Available Copies</label>
+                    <input 
+                        type="number" 
+                        id="availability" 
+                        name="availability"
+                        min="0"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Number of copies available"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">This will be automatically calculated based on total copies and current borrowings</p>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancelBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" id="saveBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200">
+                        <span id="saveBtnText">Save Book</span>
+                        <i id="saveSpinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        let books = [];
+        let editingBookId = null;
+
+        // DOM elements
+        const addBookBtn = document.getElementById('addBookBtn');
+        const bookModal = document.getElementById('bookModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const bookForm = document.getElementById('bookForm');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const booksTableBody = document.getElementById('booksTableBody');
+        const noBooksMessage = document.getElementById('noBooksMessage');
+        const modalTitle = document.getElementById('modalTitle');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const generateCodeBtn = document.getElementById('generateCodeBtn');
+
+        // Generate alphanumeric book code
+        function generateBookCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('bookCode').value = result;
+        }
+
+        // Load books
+        async function loadBooks(searchTerm = '') {
+            try {
+                // Load both books and borrowings to calculate actual availability
+                const [booksData, borrowingsData] = await Promise.all([
+                    ipcRenderer.invoke('getBooks', searchTerm),
+                    ipcRenderer.invoke('getBorrowings')
+                ]);
+                
+                books = booksData;
+                
+                // Calculate actual available copies based on current borrowings
+                books.forEach(book => {
+                    const borrowedCopies = borrowingsData.filter(b => 
+                        b.book_id == book.id && b.status === 'borrowed'
+                    ).length;
+                    book.availability = Math.max(0, (book.copies || 1) - borrowedCopies);
+                });
+                
+                renderBooks();
+            } catch (error) {
+                console.error('Error loading books:', error);
+                showNotification('Error loading books', 'error');
+            }
+        }
+
+        // Render books table
+        function renderBooks() {
+            if (books.length === 0) {
+                booksTableBody.innerHTML = '';
+                noBooksMessage.classList.remove('hidden');
+                return;
+            }
+
+            noBooksMessage.classList.add('hidden');
+            booksTableBody.innerHTML = books.map(book => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${book.bookCode || 'N/A'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${book.title}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${book.author}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            book.type === 'comics' ? 'bg-purple-100 text-purple-800' :
+                            book.type === 'story' ? 'bg-blue-100 text-blue-800' :
+                            book.type === 'novel' ? 'bg-green-100 text-green-800' :
+                            book.type === 'study-book' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-orange-100 text-orange-800'
+                        }">
+                            ${book.type === 'study-book' ? 'Study Book' : book.type}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${book.language}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${book.copies || 1}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            book.availability > 0 ? 
+                                (book.availability === book.copies ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800') : 
+                                'bg-red-100 text-red-800'
+                        }">
+                            ${book.availability > 0 ? 
+                                (book.availability === book.copies ? 'Available' : `${book.availability}/${book.copies} Available`) : 
+                                'Out of Stock'
+                            }
+                        </span>
+                        ${book.availability < book.copies ? 
+                            `<div class="text-xs text-gray-500 mt-1">${book.copies - book.availability} borrowed</div>` : 
+                            ''
+                        }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="editBook(${book.id})" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteBook(${book.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Show modal
+        function showModal(title = 'Add New Book') {
+            modalTitle.textContent = title;
+            if (title === 'Add New Book') {
+                generateBookCode();
+                // Set initial availability to match total copies for new books
+                document.getElementById('availability').value = document.getElementById('copies').value || 1;
+            }
+            bookModal.classList.remove('hidden');
+        }
+
+        // Hide modal
+        function hideModal() {
+            bookModal.classList.add('hidden');
+            bookForm.reset();
+            editingBookId = null;
+            document.getElementById('bookId').value = '';
+            document.getElementById('bookCode').value = '';
+        }
+
+        // Edit book
+        function editBook(id) {
+            const book = books.find(b => b.id === id);
+            if (book) {
+                editingBookId = id;
+                document.getElementById('bookId').value = id;
+                document.getElementById('bookCode').value = book.bookCode || ''; // Handle missing bookCode
+                document.getElementById('title').value = book.title;
+                document.getElementById('author').value = book.author;
+                document.getElementById('type').value = book.type;
+                document.getElementById('language').value = book.language;
+                document.getElementById('copies').value = book.copies || 1; // Handle missing copies
+                document.getElementById('availability').value = book.availability || book.copies || 1; // Show available copies
+                showModal('Edit Book');
+            }
+        }
+
+        // Delete book
+        async function deleteBook(id) {
+            if (confirm('Are you sure you want to delete this book?')) {
+                try {
+                    const result = await ipcRenderer.invoke('deleteBook', id);
+                    if (result.success) {
+                        showNotification('Book deleted successfully', 'success');
+                        loadBooks(searchInput.value);
+                    } else {
+                        showNotification(result.message || 'Error deleting book', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Error deleting book', 'error');
+                }
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Event listeners
+        addBookBtn.addEventListener('click', () => showModal());
+        closeModal.addEventListener('click', hideModal);
+        cancelBtn.addEventListener('click', hideModal);
+        generateCodeBtn.addEventListener('click', generateBookCode);
+        
+        // Auto-update availability when copies change
+        document.getElementById('copies').addEventListener('input', function() {
+            const copies = parseInt(this.value) || 0;
+            const availability = document.getElementById('availability');
+            const currentAvailability = parseInt(availability.value) || 0;
+            
+            // If current availability exceeds new copies, adjust it
+            if (currentAvailability > copies) {
+                availability.value = copies;
+            }
+        });
+        
+        // Search functionality
+        searchBtn.addEventListener('click', () => {
+            loadBooks(searchInput.value);
+        });
+        
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadBooks(searchInput.value);
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            loadBooks();
+        });
+
+        // Form submission
+        bookForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const saveBtn = document.getElementById('saveBtn');
+            const saveBtnText = document.getElementById('saveBtnText');
+            const saveSpinner = document.getElementById('saveSpinner');
+            
+            // Show loading state
+            saveBtn.disabled = true;
+            saveBtnText.textContent = editingBookId ? 'Updating...' : 'Saving...';
+            saveSpinner.classList.remove('hidden');
+            
+            try {
+                const formData = new FormData(bookForm);
+                const bookData = {
+                    bookCode: formData.get('bookCode'),
+                    title: formData.get('title'),
+                    author: formData.get('author'),
+                    type: formData.get('type'),
+                    language: formData.get('language'),
+                    copies: parseInt(formData.get('copies')),
+                    availability: parseInt(formData.get('availability'))
+                };
+                
+                // Validate that availability doesn't exceed total copies
+                if (bookData.availability > bookData.copies) {
+                    showNotification('Available copies cannot exceed total copies', 'error');
+                    return;
+                }
+                
+                // Validate that availability is not negative
+                if (bookData.availability < 0) {
+                    showNotification('Available copies cannot be negative', 'error');
+                    return;
+                }
+                
+                let result;
+                if (editingBookId) {
+                    result = await ipcRenderer.invoke('updateBook', { id: editingBookId, ...bookData });
+                } else {
+                    result = await ipcRenderer.invoke('addBook', bookData);
+                }
+                
+                if (result.success) {
+                    showNotification(
+                        editingBookId ? 'Book updated successfully' : 'Book added successfully',
+                        'success'
+                    );
+                    hideModal();
+                    loadBooks(searchInput.value);
+                } else {
+                    showNotification(result.message || 'Error saving book', 'error');
+                }
+            } catch (error) {
+                showNotification('Error saving book', 'error');
+            } finally {
+                // Reset button state
+                saveBtn.disabled = false;
+                saveBtnText.textContent = editingBookId ? 'Update Book' : 'Save Book';
+                saveSpinner.classList.add('hidden');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Load books when page loads
+        window.addEventListener('load', () => {
+            loadBooks();
+        });
+
+        // Make functions global for onclick handlers
+        window.editBook = editBook;
+        window.deleteBook = deleteBook;
+    </script>
+</body>
+</html>

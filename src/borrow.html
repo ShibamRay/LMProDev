@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borrow/Return - Library Management System</title>
+    <link rel="icon" type="image/png" href="../assets/logo/lg_main.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .modal {
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50">
+        <div class="flex items-center justify-center h-16 bg-indigo-600">
+            <i class="fas fa-book text-white text-2xl mr-3"></i>
+            <span class="text-white text-xl font-bold">Library MS</span>
+        </div>
+        
+        <nav class="mt-8">
+            <a href="dashboard.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                Dashboard
+            </a>
+            <a href="books.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-book mr-3"></i>
+                Books
+            </a>
+            <a href="users.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-users mr-3"></i>
+                Users
+            </a>
+            <a href="borrow.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 bg-indigo-50 border-r-4 border-indigo-600">
+                <i class="fas fa-exchange-alt mr-3"></i>
+                Borrow/Return
+            </a>
+            <a href="reports.html" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-chart-bar mr-3"></i>
+                Reports
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 w-full p-6">
+            <button id="logoutBtn" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Borrow & Return Management</h1>
+            <p class="text-gray-600">Manage book borrowing and returns</p>
+            <!-- Debug buttons hidden since issue is resolved
+            <div class="mt-4 flex gap-3">
+                <button id="recalculateAvailabilityBtn" class="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition duration-200 text-sm">
+                    <i class="fas fa-calculator mr-2"></i>
+                    Recalculate Availability
+                </button>
+                <button id="testDataBtn" class="bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-700 transition duration-200 text-sm">
+                    <i class="fas fa-bug mr-2"></i>
+                    Test Data Fetch
+                </button>
+                <button id="debugAvailabilityBtn" class="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition duration-200 text-sm">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Debug Availability
+                </button>
+            </div>
+            -->
+        </div>
+
+        <!-- Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Borrow Book Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blue-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-hand-holding text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800">Borrow Book</h3>
+                </div>
+                
+                <form id="borrowForm" class="space-y-4">
+                    <!-- User Search Section -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Search User</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label for="userNameSearch" class="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                                <input 
+                                    type="text" 
+                                    id="userNameSearch" 
+                                    placeholder="Search by name..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                            </div>
+                            <div>
+                                <label for="userStudentIdSearch" class="block text-xs font-medium text-gray-600 mb-1">Student ID</label>
+                                <input 
+                                    type="text" 
+                                    id="userStudentIdSearch" 
+                                    placeholder="Search by Student ID..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                            </div>
+                        </div>
+                        <button type="button" id="searchUserBtn" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-sm">
+                            <i class="fas fa-search mr-2"></i>
+                            Search User
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <label for="borrowUser" class="block text-sm font-medium text-gray-700 mb-2">Select User</label>
+                        <select id="borrowUser" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Choose a user...</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Book Search Section -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Search Book</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label for="bookNameSearch" class="block text-xs font-medium text-gray-600 mb-1">Book Name</label>
+                                <input 
+                                    type="text" 
+                                    id="bookNameSearch" 
+                                    placeholder="Search by book name..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                            </div>
+                            <div>
+                                <label for="bookAuthorSearch" class="block text-xs font-medium text-gray-600 mb-1">Author</label>
+                                <input 
+                                    type="text" 
+                                    id="bookAuthorSearch" 
+                                    placeholder="Search by author..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                            <div>
+                                <label for="bookTypeSearch" class="block text-xs font-medium text-gray-600 mb-1">Type</label>
+                                <select id="bookTypeSearch" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                    <option value="">All Types</option>
+                                    <option value="comics">Comics</option>
+                                    <option value="story">Story</option>
+                                    <option value="novel">Novel</option>
+                                    <option value="high-content">High-Content</option>
+                                    <option value="study-book">Study Book</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="bookLanguageSearch" class="block text-xs font-medium text-gray-600 mb-1">Language</label>
+                                <input 
+                                    type="text" 
+                                    id="bookLanguageSearch" 
+                                    placeholder="Search by language..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                            </div>
+                            <div>
+                                <label for="bookCodeSearch" class="block text-xs font-medium text-gray-600 mb-1">Book Code</label>
+                                <input 
+                                    type="text" 
+                                    id="bookCodeSearch" 
+                                    placeholder="Search by book code..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                            </div>
+                        </div>
+                        <button type="button" id="searchBookBtn" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 text-sm">
+                            <i class="fas fa-search mr-2"></i>
+                            Search Book
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <label for="borrowBook" class="block text-sm font-medium text-gray-700 mb-2">Select Available Book</label>
+                        <select id="borrowBook" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Choose a book...</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-hand-holding mr-2"></i>
+                        <span id="borrowBtnText">Borrow Book</span>
+                        <i id="borrowSpinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Return Book Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-green-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-undo text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800">Return Book</h3>
+                </div>
+                
+                <form id="returnForm" class="space-y-4">
+                    <div>
+                        <label for="returnUser" class="block text-sm font-medium text-gray-700 mb-2">Select User</label>
+                        <select id="returnUser" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">Choose a user...</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="returnBook" class="block text-sm font-medium text-gray-700 mb-2">Select Borrowed Book</label>
+                        <select id="returnBook" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">Choose a book...</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-undo mr-2"></i>
+                        <span id="returnBtnText">Return Book</span>
+                        <i id="returnSpinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Borrowings Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Current Borrowings</h3>
+                <button id="refreshBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-200 text-sm">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Refresh
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Borrowed Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="borrowingsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Borrowings will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="noBorrowingsMessage" class="hidden p-8 text-center text-gray-500">
+                <i class="fas fa-exchange-alt text-4xl mb-4"></i>
+                <p class="text-lg">No active borrowings</p>
+                <p class="text-sm">Books will appear here when borrowed</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        let users = [];
+        let books = [];
+        let borrowings = [];
+
+        // DOM elements
+        const borrowForm = document.getElementById('borrowForm');
+        const returnForm = document.getElementById('returnForm');
+        const borrowUser = document.getElementById('borrowUser');
+        const borrowBook = document.getElementById('borrowBook');
+        const returnUser = document.getElementById('returnUser');
+        const returnBook = document.getElementById('returnBook');
+        const borrowingsTableBody = document.getElementById('borrowingsTableBody');
+        const noBorrowingsMessage = document.getElementById('noBorrowingsMessage');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Debug button references removed since buttons are hidden
+        // const recalculateAvailabilityBtn = document.getElementById('recalculateAvailabilityBtn');
+        // const testDataBtn = document.getElementById('testDataBtn');
+        // const debugAvailabilityBtn = document.getElementById('debugAvailabilityBtn');
+        
+        // Search elements
+        const searchUserBtn = document.getElementById('searchUserBtn');
+        const searchBookBtn = document.getElementById('searchBookBtn');
+        const userNameSearch = document.getElementById('userNameSearch');
+        const userStudentIdSearch = document.getElementById('userStudentIdSearch');
+        const bookNameSearch = document.getElementById('bookNameSearch');
+        const bookAuthorSearch = document.getElementById('bookAuthorSearch');
+        const bookTypeSearch = document.getElementById('bookTypeSearch');
+        const bookLanguageSearch = document.getElementById('bookLanguageSearch');
+        const bookCodeSearch = document.getElementById('bookCodeSearch');
+
+        // Search users based on criteria
+        function searchUsers() {
+            const nameSearch = userNameSearch.value.toLowerCase().trim();
+            const studentIdSearch = userStudentIdSearch.value.toLowerCase().trim();
+            
+            let filteredUsers = users;
+            
+            if (nameSearch) {
+                filteredUsers = filteredUsers.filter(user => 
+                    user.name.toLowerCase().includes(nameSearch)
+                );
+            }
+            
+            if (studentIdSearch) {
+                filteredUsers = filteredUsers.filter(user => 
+                    user.student_id && user.student_id.toLowerCase().includes(studentIdSearch)
+                );
+            }
+            
+            // Populate user select with filtered results
+            const userOptions = filteredUsers.map(user => 
+                `<option value="${user.id}">${user.name} (${user.student_id || 'No ID'}) - ${user.email || 'No Email'}</option>`
+            ).join('');
+            
+            borrowUser.innerHTML = '<option value="">Choose a user...</option>' + userOptions;
+            
+            if (filteredUsers.length === 0) {
+                showNotification('No users found matching your search criteria', 'info');
+            } else {
+                showNotification(`Found ${filteredUsers.length} user(s)`, 'success');
+            }
+        }
+
+        // Search books based on criteria
+        function searchBooks() {
+            const nameSearch = bookNameSearch.value.toLowerCase().trim();
+            const authorSearch = bookAuthorSearch.value.toLowerCase().trim();
+            const typeSearch = bookTypeSearch.value;
+            const languageSearch = bookLanguageSearch.value.toLowerCase().trim();
+            const codeSearch = bookCodeSearch.value.toLowerCase().trim();
+            
+            // Filter books with proper availability validation
+            let filteredBooks = books.filter(book => {
+                const available = parseInt(book.availability) || 0;
+                const total = parseInt(book.copies) || 1;
+                return available > 0 && available <= total;
+            });
+            
+            if (nameSearch) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.title.toLowerCase().includes(nameSearch)
+                );
+            }
+            
+            if (authorSearch) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.author.toLowerCase().includes(authorSearch)
+                );
+            }
+            
+            if (typeSearch) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.type === typeSearch
+                );
+            }
+            
+            if (languageSearch) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.language.toLowerCase().includes(languageSearch)
+                );
+            }
+            
+            if (codeSearch) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.bookCode && book.bookCode.toLowerCase().includes(codeSearch)
+                );
+            }
+            
+            // Populate book select with filtered results
+            const bookOptions = filteredBooks.map(book => 
+                `<option value="${book.id}">${book.title} by ${book.author} (${book.bookCode || 'No Code'}) - ${book.type} - ${book.availability}/${book.copies} copies available</option>`
+            ).join('');
+            
+            borrowBook.innerHTML = '<option value="">Choose a book...</option>' + bookOptions;
+            
+            if (filteredBooks.length === 0) {
+                showNotification('No available books found matching your search criteria', 'info');
+            } else {
+                showNotification(`Found ${filteredBooks.length} available book(s)`, 'success');
+            }
+        }
+
+        // Function to check for data inconsistencies
+        function checkDataConsistency() {
+            console.log('=== Data Consistency Check ===');
+            
+            let hasIssues = false;
+            
+            books.forEach(book => {
+                const total = parseInt(book.copies) || 1;
+                const storedAvailability = parseInt(book.availability) || 0;
+                
+                // Find actual borrowings
+                const actualBorrowings = borrowings.filter(b => 
+                    b.book_id == book.id && b.status === 'borrowed'
+                );
+                const actualBorrowed = actualBorrowings.length;
+                const calculatedAvailability = Math.max(0, total - actualBorrowed);
+                
+                // Check for inconsistencies
+                if (storedAvailability !== calculatedAvailability) {
+                    hasIssues = true;
+                    console.error(`❌ INCONSISTENCY FOUND in book: ${book.title}`);
+                    console.error(`  Total copies: ${total}`);
+                    console.error(`  Stored availability: ${storedAvailability}`);
+                    console.error(`  Actual borrowed: ${actualBorrowed}`);
+                    console.error(`  Calculated availability: ${calculatedAvailability}`);
+                    console.error(`  Difference: ${storedAvailability - calculatedAvailability}`);
+                } else {
+                    console.log(`✅ Book "${book.title}" is consistent`);
+                }
+            });
+            
+            if (!hasIssues) {
+                console.log('🎉 All books are consistent!');
+            } else {
+                console.warn('⚠️ Data inconsistencies found. This may cause borrowing issues.');
+            }
+            
+            return !hasIssues;
+        }
+
+        // Function to display current availability status
+        function displayAvailabilityStatus() {
+            console.log('=== Current Availability Status ===');
+            console.log('Total books loaded:', books.length);
+            console.log('Total borrowings loaded:', borrowings.length);
+            
+            books.forEach(book => {
+                const total = parseInt(book.copies) || 1;
+                const available = parseInt(book.availability) || 0;
+                const borrowed = total - available;
+                
+                // Find actual borrowings for this book
+                const actualBorrowings = borrowings.filter(b => 
+                    b.book_id == book.id && b.status === 'borrowed'
+                );
+                
+                console.log(`${book.title} (ID: ${book.id}):`);
+                console.log(`  Total copies: ${total}`);
+                console.log(`  Stored availability: ${available}`);
+                console.log(`  Calculated borrowed: ${borrowed}`);
+                console.log(`  Actual borrowings found: ${actualBorrowings.length}`);
+                actualBorrowings.forEach(b => {
+                    console.log(`    - Borrowed by user ${b.user_id} on ${b.borrowed_date}`);
+                });
+                console.log(`  Can borrow: ${available > 0 ? 'YES' : 'NO'}`);
+                console.log(`  Raw book data:`, book);
+            });
+            
+            // Run consistency check
+            checkDataConsistency();
+        }
+
+        // Load initial data
+        async function loadData() {
+            try {
+                console.log('=== Starting Data Load ===');
+                
+                // Load users, books, and borrowings
+                const [usersData, booksData, borrowingsData] = await Promise.all([
+                    ipcRenderer.invoke('getUsers'),
+                    ipcRenderer.invoke('getBooks'),
+                    ipcRenderer.invoke('getBorrowings')
+                ]);
+                
+                console.log('=== Raw Data Received ===');
+                console.log('Users:', usersData);
+                console.log('Books:', booksData);
+                console.log('Borrowings:', borrowingsData);
+                
+                users = usersData;
+                books = booksData;
+                borrowings = borrowingsData;
+                
+                console.log('=== Processing Books ===');
+                
+                // Completely recalculate availability based on actual borrowings
+                books.forEach(book => {
+                    console.log(`Processing book: ${book.title} (ID: ${book.id})`);
+                    
+                    // Get total copies (ensure it's a number)
+                    const totalCopies = parseInt(book.copies) || 1;
+                    console.log(`  Total copies: ${totalCopies}`);
+                    
+                    // Count how many copies are currently borrowed
+                    const borrowedCopies = borrowingsData.filter(b => 
+                        b.book_id == book.id && b.status === 'borrowed'
+                    ).length;
+                    console.log(`  Borrowed copies found: ${borrowedCopies}`);
+                    
+                    // Calculate actual available copies
+                    const actualAvailable = Math.max(0, totalCopies - borrowedCopies);
+                    console.log(`  Calculated available: ${actualAvailable}`);
+                    
+                    // Override any stored availability with calculated value
+                    const oldAvailability = book.availability;
+                    book.availability = actualAvailable;
+                    console.log(`  Old availability: ${oldAvailability} → New availability: ${actualAvailable}`);
+                    
+                    // Verify the calculation
+                    if (actualAvailable !== (totalCopies - borrowedCopies)) {
+                        console.warn(`  WARNING: Availability calculation mismatch!`);
+                        console.warn(`    Expected: ${totalCopies} - ${borrowedCopies} = ${totalCopies - borrowedCopies}`);
+                        console.warn(`    Got: ${actualAvailable}`);
+                    }
+                });
+                
+                console.log('=== Final Book Data ===');
+                books.forEach(book => {
+                    console.log(`${book.title}: ${book.availability}/${book.copies} available`);
+                });
+                
+                // Display availability status for debugging
+                displayAvailabilityStatus();
+                
+                populateUserSelects();
+                populateBookSelects();
+                renderBorrowings();
+                
+                console.log('=== Data Load Complete ===');
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showNotification('Error loading data', 'error');
+            }
+        }
+
+        // Populate user select dropdowns
+        function populateUserSelects() {
+            const userOptions = users.map(user => 
+                `<option value="${user.id}">${user.name} (${user.student_id || 'No ID'}) - ${user.email || 'No Email'}</option>`
+            ).join('');
+            
+            borrowUser.innerHTML = '<option value="">Choose a user...</option>' + userOptions;
+            returnUser.innerHTML = '<option value="">Choose a user...</option>' + userOptions;
+        }
+
+        // Populate book select dropdowns
+        function populateBookSelects() {
+            console.log('=== Populating Book Selects ===');
+            console.log('Total books:', books.length);
+            
+            // Available books for borrowing - ensure availability is properly calculated
+            const availableBooks = books.filter(book => {
+                const available = parseInt(book.availability) || 0;
+                const total = parseInt(book.copies) || 1;
+                const isAvailable = available > 0 && available <= total;
+                
+                console.log(`Book: ${book.title}`);
+                console.log(`  - Total copies: ${total}`);
+                console.log(`  - Available: ${available}`);
+                console.log(`  - Is available: ${isAvailable}`);
+                
+                return isAvailable;
+            });
+            
+            console.log('Available books for borrowing:', availableBooks.length);
+            
+            const availableBookOptions = availableBooks.map(book => 
+                `<option value="${book.id}">${book.title} by ${book.author} (${book.bookCode || 'No Code'}) - ${book.type} - ${book.availability}/${book.copies} copies available</option>`
+            ).join('');
+            
+            borrowBook.innerHTML = '<option value="">Choose a book...</option>' + availableBookOptions;
+        }
+
+        // Update return book options based on selected user
+        function updateReturnBookOptions(userId) {
+            if (!userId) {
+                returnBook.innerHTML = '<option value="">Choose a book...</option>';
+                return;
+            }
+            
+            // Get borrowed books for this user
+            const userBorrowings = borrowings.filter(b => 
+                b.user_id == userId && b.status === 'borrowed'
+            );
+            
+            const borrowedBookOptions = userBorrowings.map(borrowing => 
+                `<option value="${borrowing.book_id}">${borrowing.book_title} by ${borrowing.book_author}</option>`
+            ).join('');
+            
+            returnBook.innerHTML = '<option value="">Choose a book...</option>' + borrowedBookOptions;
+        }
+
+        // Render borrowings table
+        function renderBorrowings() {
+            const activeBorrowings = borrowings.filter(b => b.status === 'borrowed');
+            
+            if (activeBorrowings.length === 0) {
+                borrowingsTableBody.innerHTML = '';
+                noBorrowingsMessage.classList.remove('hidden');
+                return;
+            }
+
+            noBorrowingsMessage.classList.add('hidden');
+            borrowingsTableBody.innerHTML = activeBorrowings.map(borrowing => {
+                const borrowedDate = new Date(borrowing.borrowed_date).toLocaleDateString();
+                
+                // Find user details to get Student ID and Grade
+                const user = users.find(u => u.id == borrowing.user_id);
+                const studentId = user ? (user.student_id || 'N/A') : 'N/A';
+                const grade = user ? (user.grade || 'N/A') : 'N/A';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-8 w-8">
+                                    <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        <i class="fas fa-user text-indigo-600 text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900">${borrowing.user_name}</div>
+                                    <div class="text-sm text-gray-500">${borrowing.user_email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${studentId}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${grade}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${borrowing.book_title}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${borrowing.book_author}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${borrowedDate}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Borrowed
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="quickReturn(${borrowing.user_id}, ${borrowing.book_id})" class="text-green-600 hover:text-green-900">
+                                <i class="fas fa-undo mr-1"></i>
+                                Return
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Quick return function
+        async function quickReturn(userId, bookId) {
+            if (confirm('Are you sure you want to return this book?')) {
+                try {
+                    const result = await ipcRenderer.invoke('returnBook', { userId, bookId });
+                    if (result.success) {
+                        showNotification('Book returned successfully', 'success');
+                        
+                        // Immediately update book availability for the returned book
+                        const returnedBook = books.find(b => b.id == bookId);
+                        if (returnedBook) {
+                            returnedBook.availability = Math.min(returnedBook.copies, returnedBook.availability + 1);
+                        }
+                        
+                        loadData(); // Refresh all data
+                    } else {
+                        showNotification(result.message || 'Error returning book', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Error returning book', 'error');
+                }
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Event listeners
+        
+        // Search button event listeners
+        searchUserBtn.addEventListener('click', searchUsers);
+        searchBookBtn.addEventListener('click', searchBooks);
+        
+        // Debug buttons hidden since issue is resolved
+        // recalculateAvailabilityBtn.addEventListener('click', () => {
+        //     console.log('=== Manual Availability Recalculation ===');
+        //     loadData(); // This will recalculate everything
+        //     showNotification('Availability recalculated', 'success');
+        // });
+        
+        // testDataBtn.addEventListener('click', () => {
+        //     console.log('=== Testing Data Fetch ===');
+        //     loadData().then(() => {
+        //         showNotification('Data fetch test complete. Check console for results.', 'success');
+        //     }).catch(error => {
+        //         showNotification(`Data fetch test failed: ${error.message}`, 'error');
+        //     });
+        // });
+        
+        // debugAvailabilityBtn.addEventListener('click', () => {
+        //     console.log('=== Debugging Availability ===');
+        //     ipcRenderer.invoke('debugAvailability').then(result => {
+        //         if (result.success) {
+        //         showNotification('Availability debug complete. Check console for results.', 'success');
+        //         console.log('Debug Results:', result.data);
+        //         } else {
+        //         showNotification(result.message || 'Error during availability debug', 'error');
+        //         console.error('Debug Error:', result.message);
+        //         }
+        //     }).catch(error => {
+        //         showNotification('Error during availability debug', 'error');
+        //         console.error('Debug Error:', error);
+        //         });
+        // });
+        
+        // Enter key support for search fields
+        userNameSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchUsers();
+        });
+        userStudentIdSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchUsers();
+        });
+        bookNameSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchBooks();
+        });
+        bookAuthorSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchBooks();
+        });
+        bookLanguageSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchBooks();
+        });
+        bookCodeSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchBooks();
+        });
+        
+        // Return user selection change
+        returnUser.addEventListener('change', (e) => {
+            updateReturnBookOptions(e.target.value);
+        });
+
+        // Borrow form submission
+        borrowForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = borrowUser.value;
+            const bookId = borrowBook.value;
+            
+            if (!userId || !bookId) {
+                showNotification('Please select both user and book', 'error');
+                return;
+            }
+            
+            // Additional validation: check if book is actually available
+            const selectedBook = books.find(b => b.id == bookId);
+            if (!selectedBook) {
+                showNotification('Selected book not found', 'error');
+                return;
+            }
+            
+            const available = parseInt(selectedBook.availability) || 0;
+            if (available <= 0) {
+                showNotification(`Book "${selectedBook.title}" is not available for borrowing (${available} copies available)`, 'error');
+                return;
+            }
+            
+            console.log(`Attempting to borrow: ${selectedBook.title}, Available: ${available}/${selectedBook.copies}`);
+            
+            const borrowBtnText = document.getElementById('borrowBtnText');
+            const borrowSpinner = document.getElementById('borrowSpinner');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            borrowBtnText.textContent = 'Borrowing...';
+            borrowSpinner.classList.remove('hidden');
+            
+            try {
+                const result = await ipcRenderer.invoke('borrowBook', { userId, bookId });
+                if (result.success) {
+                    showNotification('Book borrowed successfully', 'success');
+                    borrowForm.reset();
+                    
+                    // Immediately update book availability for the borrowed book
+                    const borrowedBook = books.find(b => b.id == bookId);
+                    if (borrowedBook) {
+                        borrowedBook.availability = Math.max(0, borrowedBook.availability - 1);
+                    }
+                    
+                    // Refresh all data to update the UI
+                    loadData();
+                } else {
+                    showNotification(result.message || 'Error borrowing book', 'error');
+                }
+            } catch (error) {
+                showNotification('Error borrowing book', 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                borrowBtnText.textContent = 'Borrow Book';
+                borrowSpinner.classList.add('hidden');
+            }
+        });
+
+        // Return form submission
+        returnForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = returnUser.value;
+            const bookId = returnBook.value;
+            
+            if (!userId || !bookId) {
+                showNotification('Please select both user and book', 'error');
+                return;
+            }
+            
+            const returnBtnText = document.getElementById('returnBtnText');
+            const returnSpinner = document.getElementById('returnSpinner');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            returnBtnText.textContent = 'Returning...';
+            returnSpinner.classList.remove('hidden');
+            
+            try {
+                const result = await ipcRenderer.invoke('returnBook', { userId, bookId });
+                if (result.success) {
+                    showNotification('Book returned successfully', 'success');
+                    returnForm.reset();
+                    
+                    // Immediately update book availability for the returned book
+                    const returnedBook = books.find(b => b.id == bookId);
+                    if (returnedBook) {
+                        returnedBook.availability = Math.min(returnedBook.copies, returnedBook.availability + 1);
+                    }
+                    
+                    // Refresh all data to update the UI
+                    loadData();
+                } else {
+                    showNotification(result.message || 'Error returning book', 'error');
+                }
+            } catch (error) {
+                showNotification('Error returning book', 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                returnBtnText.textContent = 'Return Book';
+                returnSpinner.classList.add('hidden');
+            }
+        });
+
+        // Refresh button
+        refreshBtn.addEventListener('click', () => {
+            loadData();
+            showNotification('Data refreshed', 'success');
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Load data when page loads
+        window.addEventListener('load', () => {
+            loadData();
+        });
+
+        // Make functions global for onclick handlers
+        window.quickReturn = quickReturn;
+    </script>
+</body>
+</html>
